@@ -2,7 +2,7 @@
 title: NVIDIA CUDA Toolkit
 alias: [nvidia-cuda, cuda]
 os: [Windows, Linux]
-category: [Driver]
+category: [Development]
 tags: [Graphics Driver, CUDA, Parallel Computing, GPU] 
 description: 用 GPU 
 ---

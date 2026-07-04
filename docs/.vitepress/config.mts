@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 import fs from 'fs'
 import path from 'path'
+import { CONTENT_DIRS, extractScalar, type DirConfig } from './content.config'
 
 // 如果2、3行有红色波浪线，尝试运行 `npm i --save-dev @types/node`
 
@@ -29,30 +30,30 @@ const bilibiliIcon = fs.readFileSync( path.resolve(process.cwd(), 'docs/bilibili
 // ── 自动生成 sidebar ──
 // 扫描 docs/<dir>/ 下所有 .md 文件，从 frontmatter 中读取 title 自动生成侧边栏条目
 // index.md 固定显示为"首页"，其 frontmatter title 用作侧边栏分类标题
-function autoSidebar(dir: string): { text: string; items: Array<{ text: string; link: string }> } {
+function autoSidebar(cfg: DirConfig): { text: string; items: Array<{ text: string; link: string }> } {
   const docsDir = path.resolve(process.cwd(), 'docs')
-  const fullDir = path.join(docsDir, dir)
+  const fullDir = path.join(docsDir, cfg.dir)
 
-  if (!fs.existsSync(fullDir)) return { text: dir, items: [] }
+  if (!fs.existsSync(fullDir)) return { text: cfg.navText, items: [] }
 
   const mdFiles = fs.readdirSync(fullDir).filter(f => f.endsWith('.md'))
 
-  // 从 index.md 的 frontmatter 中获取分类标题
-  let sectionText = dir
+  // 从 index.md 的 frontmatter 中获取分类标题，fallback 为 navText
+  let sectionText = cfg.navText
   const indexFile = mdFiles.find(f => f === 'index.md')
   if (indexFile) {
     const indexContent = fs.readFileSync(path.join(fullDir, indexFile), 'utf-8')
-    const titleMatch = indexContent.match(/^title:\s*(.+)$/m)
-    if (titleMatch) sectionText = titleMatch[1].trim()
+    const title = extractScalar(indexContent, 'title')
+    if (title) sectionText = title
   }
 
   // 为每个 .md 文件生成侧边栏条目
   const items = mdFiles.map(file => {
     const name = path.basename(file, '.md')
     const content = fs.readFileSync(path.join(fullDir, file), 'utf-8')
-    const titleMatch = content.match(/^title:\s*(.+)$/m)
-    const text = name === 'index' ? '首页' : (titleMatch ? titleMatch[1].trim() : name)
-    return { text, link: `/${dir}/${name}` }
+    const title = extractScalar(content, 'title')
+    const text = name === 'index' ? '首页' : (title || name)
+    return { text, link: `/${cfg.dir}/${name}` }
   })
 
   // index 排最前，其余按中文拼音排序
@@ -113,15 +114,13 @@ export default defineConfig({
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: '实用软件分享', link: '/SoftShare' },
-      { text: 'Linux 基础', link:'/LinuxBasis'}
+      ...CONTENT_DIRS.map(d => ({ text: d.navText, link: `/${d.dir}` })),
     ],
 
-    // ⬇️ 文档左侧栏 - 自动从目录和 frontmatter 生成
+    // ⬇️ 文档左侧栏 - 从 CONTENT_DIRS 自动生成
     // 新增/删除笔记或修改标题后无需手动更新 sidebar
-    sidebar: {
-      '/SoftShare/': [autoSidebar('SoftShare')],
-      '/LinuxBasis/': [autoSidebar('LinuxBasis')]
-    }
+    sidebar: Object.fromEntries(
+      CONTENT_DIRS.map(d => [`/${d.dir}/`, [autoSidebar(d)]])
+    )
   }
 })

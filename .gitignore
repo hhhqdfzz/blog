@@ -5,3 +5,5 @@ docs/.vitepress/cache/
 docs/.vitepress/config_*.mts
 .claude/
 CLAUDE.md
+docs/api-examples.md
+docs/markdown-examples.md

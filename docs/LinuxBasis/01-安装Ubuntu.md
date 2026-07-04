@@ -33,7 +33,7 @@ title: 01 安装 Ubuntu 24.04.2 LTS（实机双系统）
 ### 重要分区
 - **EFI System Partition**：启动分区。如果一块磁盘没有 EFI System Partition，或其 EFI System Partition 中的文件被破坏，则整块磁盘中安装的操作系统就不能启动，使得电脑启动不能进入该磁盘上的任何操作系统。电脑开机时，首先进入 BIOS/UEFI（后文简称BIOS）。BIOS 检索 EFI System Partition 中所有的引导项。如果没有用户的干预，BIOS 会自动加载默认的引导项，运行的软件由BIOS转向该引导项对应的软件，通常来说，就是某个操作系统了。所以每个能运行的操作系统都有自身的引导项。至于如何干预，从而修改默认引导项或加载其他引导项，见[“设置BIOS”](#设置BIOS)和[“进入安装程序”](#进入安装程序)。
     - **BIOS（Basic Input/Output System，基本输入输出系统）** 本质上是一种软件，是电脑开机时运行的第一个程序，而UEFI（Unified Extensible Firmware Interface）是更高级的 BIOS。
-    - 自己的电脑用的是BIOS还是UEFI（BIOS模式）？见[“查看系统信息”](3-系统维护.md#查看系统信息)。
+    - 自己的电脑用的是BIOS还是UEFI（BIOS模式）？见[“查看系统信息”](05-系统维护.md#查看系统信息)。
 
 ### 文件系统
 - **FAT32**：EFI System Partition 往往采用 FAT32 文件系统，在上图中为 `磁盘0 磁盘分区1`。FAT32 的适用分区不局限于 EFI System Partition。iOS 对此具有读写权限。

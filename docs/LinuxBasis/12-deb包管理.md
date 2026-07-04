@@ -1,5 +1,5 @@
 ---
-title: 12 APT 包管理器
+title: 12 deb 包管理
 ---
 
 # {{ $frontmatter.title }} 
@@ -174,7 +174,7 @@ binzz@C7VF:~$
 ![不以sudo启动synaptic的结果](assets/softmanage-3.png)
 但是点击“关闭“就好了，可以进入正常的界面，只是不能执行相关操作。
 
-至于为什么打开终端后会有“Debian 参考卡片”，参见[“fortune名人名言”](8-娱乐篇.md#fortune)和[“编辑自启动项”](14-系统设置.md#编辑自启动项)两节。
+至于为什么打开终端后会有“Debian 参考卡片”，参见[“fortune名人名言”](14-娱乐篇.md#fortune)和[“启动机制”](07-Bash与终端.md#启动机制)两节。
 
 
 

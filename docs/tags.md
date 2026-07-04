@@ -7,120 +7,235 @@ layout: page
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useData, withBase } from 'vitepress'
+import { withBase } from 'vitepress'
+import { data as allArticles } from './articles.data'
 
-// 捞取全站所有文章的数据
-const { pages } = useData()
+// ==========================================
+// ⚙️ 【通用配置中心】 以后改这里就行
+// ==========================================
 
-// 定义当前选中的系统，默认是 'all' (显示全部)
-const currentSystem = ref('all')
+// 1. 指定捞取的文章路径范围（由于增加了智能基础路径剔除，这里写真实文件夹名即可）
+const ALLOWED_PATHS = ['SoftShare']
 
-// 所有的系统标签列表
-const systems = ['all', 'windows', 'linux', 'macOS']
+// 2. 定义你想筛选的 Frontmatter 标签维度（对应你文章顶部的键名）
+const FILTER_DIMENSIONS = [
+  { label: '适用系统：', key: 'os' },
+  { label: '软件类型：', key: 'category' }
+]
 
-// 💡 核心算法：动态过滤出含有当前选中系统的笔记
+// 3. 定义每个标签维度允许的可选值
+const DIMENSION_VALUES = {
+  os: ['Windows', 'Linux', 'macOS'],
+  category: ['Development', 'Utility', 'Office', 'Game', 'Network', 'Graphics', 'System', 'Media']
+}
+
+// ==========================================
+// 核心逻辑与算法
+// ==========================================
+
+// 安全初始化响应式状态
+const selectedFilters = ref({})
+FILTER_DIMENSIONS.forEach(dim => {
+  selectedFilters.value[dim.key] = 'all'
+})
+
+// 核心算法：通用多维动态过滤
 const filteredNotes = computed(() => {
-  // 过滤掉首页(index.md)和当前分类页(tags.md)
-  const allNotes = pages.value.filter(p => p.currentSystem !== 'page' && p.frontmatter.systems)
-  
-  if (currentSystem.value === 'all') {
-    return allNotes
-  }
-  return allNotes.filter(p => {
-    const sysList = p.frontmatter.systems || []
-    return sysList.includes(currentSystem.value)
+  if (!allArticles || !Array.isArray(allArticles)) return []
+
+  return allArticles.filter(p => {
+    // 排除 index.md 导航页
+    if (p.isIndex) return false
+
+    // 过滤一：路径范围校验（只显示 SoftShare 等目标目录下的文章）
+    const isInRange = ALLOWED_PATHS.some(prefix => p.sectionDir === prefix)
+    if (!isInRange) return false
+
+    // 过滤二：动态多维标签校验
+    return FILTER_DIMENSIONS.every(dim => {
+      const currentSelectedValue = selectedFilters.value[dim.key] || 'all'
+
+      // 如果当前维度选的是 'all'（全部），直接放行
+      if (currentSelectedValue === 'all') return true
+
+      // 不管 Frontmatter 里存的是什么格式，一律强行转为”去空格纯字符串数组”
+      const rawValue = p.frontmatter[dim.key]
+      let noteValues = []
+
+      if (Array.isArray(rawValue)) {
+        noteValues = rawValue.map((v) => String(v).trim())
+      } else if (rawValue) {
+        noteValues = String(rawValue).split(',').map(v => v.trim())
+      }
+
+      // 忽略大小写进行严格匹配
+      return noteValues.some(val => val.toLowerCase() === currentSelectedValue.toLowerCase())
+    })
   })
 })
+
+// 获取某个维度的按钮列表（自动在最前面拼接一个 'all'）
+const getButtonsForDimension = (key) => {
+  return ['all', ...(DIMENSION_VALUES[key] || [])]
+}
 </script>
 
-<div class="filter-buttons">
-  <button 
-    v-for="sys in systems" 
-    :key="sys"
-    :class="{ active: currentSystem === sys }"
-    @click="currentSystem = sys"
-  >
-    {{ sys.toUpperCase() }}
-  </button>
+<div class="filter-panel">
+  <div v-for="dim in FILTER_DIMENSIONS" :key="dim.key" class="filter-row">
+    <span class="filter-label">{{ dim.label }}</span>
+    <div class="filter-buttons">
+      <button 
+        v-for="val in getButtonsForDimension(dim.key)" 
+        :key="val"
+        :class="{ active: selectedFilters[dim.key] === val }"
+        @click="selectedFilters[dim.key] = val"
+      >
+        {{ val === 'all' ? '全部' : val }}
+      </button>
+    </div>
+  </div>
 </div>
 
----
+<hr class="divider">
 
 <div class="notes-grid">
   <div v-if="filteredNotes.length === 0" class="no-data">
-    没有找到支持该系统的软件笔记 
+    没有找到满足当前筛选条件的软件笔记
   </div>
   
-  <a 
-    v-for="note in filteredNotes" 
-    :key="note.url" 
-    :href="withBase(note.url)"
-    class="note-card"
-  >
-    <h3>{{ note.frontmatter.title || note.title }}</h3>
-    <div class="sys-tags">
-      <span v-for="s in note.frontmatter.systems" :key="s" class="sys-tag">
-        {{ s }}
-      </span>
+  <a v-for="note in filteredNotes" :key="note.url" :href="withBase(note.url)" class="note-card">
+    <div class="card-content">
+      <h3 class="card-title">{{ note.frontmatter.title || note.title }}</h3>
+      <p v-if="note.frontmatter.description" class="card-desc">
+        {{ note.frontmatter.description }}
+      </p>
+    </div>
+
+  <div class="card-badges">
+      <div v-for="dim in FILTER_DIMENSIONS" :key="dim.key" class="badge-group">
+        <template v-if="note.frontmatter && note.frontmatter[dim.key]">
+          <span 
+            v-for="badgeVal in (Array.isArray(note.frontmatter[dim.key]) ? note.frontmatter[dim.key] : [note.frontmatter[dim.key]])" 
+            :key="badgeVal" 
+            class="badge" 
+            :class="dim.key + '-badge'"
+          >
+            {{ String(badgeVal).trim() }}
+          </span>
+        </template>
+      </div>
     </div>
   </a>
 </div>
 
 <style scoped>
+.filter-panel {
+  background: var(--vp-c-bg-elv);
+  border: 1px solid var(--vp-c-gutter);
+  padding: 18px;
+  border-radius: 12px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.filter-row {
+  display: flex;
+  align-items: center;
+}
+.filter-label {
+  font-weight: bold;
+  min-width: 80px;
+  color: var(--vp-c-text-1);
+}
 .filter-buttons {
   display: flex;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .filter-buttons button {
-  padding: 6px 16px;
-  border: 1px solid var(--vp-c-brand);
-  border-radius: 20px;
+  padding: 4px 14px;
+  border: 1px solid var(--vp-c-brand-1);
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
   background: transparent;
-  color: var(--vp-c-brand);
-  transition: all 0.2s;
+  color: var(--vp-c-brand-1);
+  transition: all 0.2s ease;
 }
 .filter-buttons button:hover, .filter-buttons button.active {
-  background: var(--vp-c-brand);
-  color: white;
+  background: var(--vp-c-brand-1);
+  color: var(--vp-c-bg);
+}
+.divider {
+  margin: 25px 0;
+  border-color: var(--vp-c-gutter);
 }
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.no-data {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: var(--vp-c-text-2);
 }
 .note-card {
-  border: 1px solid var(--vp-c-bg-adv);
+  border: 1px solid var(--vp-c-gutter);
   background-color: var(--vp-c-bg-elv);
-  padding: 15px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: 10px;
   text-decoration: none !important;
   color: inherit !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-height: 130px;
+  transition: all 0.25s ease;
 }
 .note-card:hover {
-  border-color: var(--vp-c-brand);
-  transform: translateY(-2px);
-  transition: all 0.2s;
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-.note-card h3 {
-  margin: 0 0 10px 0;
-  font-size: 1.1rem;
+.card-title {
+  margin: 0 0 6px 0 !important;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
 }
-.sys-tags {
+.card-desc {
+  font-size: 0.85rem;
+  color: var(--vp-c-text-2);
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+.card-badges {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+}
+.badge-group {
+  display: flex;
+  gap: 4px;
   flex-wrap: wrap;
 }
-.sys-tag {
-  font-size: 0.75rem;
-  background: var(--vp-c-bg-alt);
-  padding: 2px 6px;
+.badge {
+  font-size: 0.7rem;
+  padding: 1px 6px;
   border-radius: 4px;
+  font-weight: 500;
+}
+.os-badge {
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
+.category-badge {
+  background: var(--vp-c-bg-alt);
   color: var(--vp-c-text-2);
+  border: 1px solid var(--vp-c-gutter);
 }
 </style>
