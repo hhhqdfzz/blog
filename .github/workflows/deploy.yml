@@ -42,9 +42,6 @@ jobs:
           VITE_ALGOLIA_API_KEY: ${{ secrets.VITE_ALGOLIA_API_KEY }}
           VITE_ALGOLIA_INDEX_NAME: ${{ secrets.VITE_ALGOLIA_INDEX_NAME }}
           ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
-				# run 步骤
-				# 从 GitHub Secrets 注入变量
-				# 确保 package.json 定义了 docs:build 命令
         run: |
           echo "VITE_ALGOLIA_APP_ID=${VITE_ALGOLIA_APP_ID}" > .env
           echo "VITE_ALGOLIA_API_KEY=${VITE_ALGOLIA_API_KEY}" >> .env
