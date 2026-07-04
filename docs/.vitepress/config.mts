@@ -5,6 +5,9 @@ import { CONTENT_DIRS, extractScalar, type DirConfig } from './content.config'
 
 // 如果2、3行有红色波浪线，尝试运行 `npm i --save-dev @types/node`
 
+// 🌟 想改 base 名称，只需要改这里！部署到 https://<你的用户名>.github.io/<BASE_NAME>/。默认为空
+export const BASE_NAME = 'blog'
+
 // ── 手动读取 .env（配置文件运行在 Node.js 中，import.meta.env 不可用） ──
 function loadEnv(filepath: string): Record<string, string> {
   const env: Record<string, string> = {}
@@ -71,7 +74,7 @@ export default defineConfig({
   description: "想写啥就写啥。",
   cleanUrls: true, // 去掉网页地址栏的 .html 后缀
   lastUpdated: true, // 显示最后更新时间
-  base: '/blog/', // 部署到 https://<你的用户名>.github.io/<仓库名>/。默认为空
+  base: `/${BASE_NAME}/`, 
 
   themeConfig: {
     logo: '/logo.ico',
