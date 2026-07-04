@@ -6,7 +6,7 @@ layout: home
 hero:
   name: "韩会会-QDFZZ. 的博客"
   text: "开发中……"
-  tagline: 想写啥就写啥。
+  tagline: 随便写写。
   logo: '/logo.ico'
   actions:
     - theme: brand
@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: 标签检索
-    details: 与一般的文本搜索不同，标签检索是根据文章的标签属性，对全站网站进行文章筛选的一个功能
+    details: 根据标签属性，对全站文章进行筛选
   - title: Feature B
     details: 保姆级
   - title: Feature C
