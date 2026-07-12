@@ -1,5 +1,5 @@
 ---
-title: Paragon Extfs for Windows —— 读取 extfs 文件系统
+title: Paragon Extfs for Windows
 alias: [paragon_extfs_for_windows, paragon]
 os: [Windows]
 category: [System]

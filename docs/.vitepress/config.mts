@@ -82,6 +82,14 @@ export default defineConfig({
       level: 'deep', // 显示二级及以下标题
     },
 
+    lastUpdated: {
+      text: '最近更新于 ',
+      formatOptions: {
+        dateStyle: 'full',
+        timeStyle: 'medium'
+      }
+    },
+
     // ⬇️ 加上这一行，可以在每篇文章的左下角自动生成"返回顶部"的链接
     docFooter: {
         prev: '上一篇',
