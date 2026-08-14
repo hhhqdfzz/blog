@@ -1,5 +1,8 @@
 ---
 title: 服务器架设
+next: 
+    text: 网络知识
+    link: /Server/网络知识.md
 ---
   
 # {{ $frontmatter.title }}
