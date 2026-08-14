@@ -1,6 +1,15 @@
-import DefaultTheme from 'vitepress/theme' // 1. 把官方做好的皮肤偷过来
-import './custom.css' // 🧠 在这里引入你的自定义样式表
+import DefaultTheme from 'vitepress/theme'
+import { h } from 'vue'
+import './custom.css'
+// 引入刚刚写好的事件监听与样式注入组件
+import MermaidToolbar from './components/MermaidToolbar.vue' 
 
 export default {
-  ...DefaultTheme // 继承官方所有样式
+  extends: DefaultTheme,
+  Layout() {
+    // 将该组件以无侵入的方式挂载在 Layout 底部执行
+    return h(DefaultTheme.Layout, null, {
+      'layout-bottom': () => h(MermaidToolbar)
+    })
+  }
 }

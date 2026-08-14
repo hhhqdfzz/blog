@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 import fs from 'fs'
 import path from 'path'
 import { CONTENT_DIRS, extractScalar, type DirConfig } from './content.config'
@@ -69,7 +70,7 @@ function autoSidebar(cfg: DirConfig): { text: string; items: Array<{ text: strin
   return { text: sectionText, items }
 }
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: "韩会会-QDFZZ. 的博客",
   description: "想写啥就写啥。",
   cleanUrls: true, // 去掉网页地址栏的 .html 后缀
@@ -133,5 +134,30 @@ export default defineConfig({
     sidebar: Object.fromEntries(
       CONTENT_DIRS.map(d => [`/${d.dir}/`, [autoSidebar(d)]])
     )
+  },
+
+  // 核心配置：优化 Mermaid 渲染引擎
+  mermaid: {
+    // 强制将样式内联注入到 SVG 标签内，彻底解决 Inkscape 等外部软件打开全黑的问题
+    theme: 'default', 
+    mermaidHtmlClass: 'custom-mermaid-svg',
+    // 核心修改：重新启用 HTML 标签渲染文字，保证网页和初始排版位置 100% 绝对精准
+    htmlLabels: true 
+  },
+
+  markdown: {
+    config: (md) => {
+      // 拦截 Markdown 渲染器：在编译时把原始的 mermaid 源码藏进 dataset 属性里
+      const defaultRenderer = md.renderer.rules.fence;
+      md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+        const token = tokens[idx];
+        if (token.info.trim() === 'mermaid') {
+          // 讲原始的源码安全地进行 Base64 编码，防止特殊字符破坏 HTML 结构
+          const rawCode = Buffer.from(token.content).toString('base64');
+          return `<div class="custom-mermaid-container" data-raw="${rawCode}">${defaultRenderer(tokens, idx, options, env, self)}</div>`;
+        }
+        return defaultRenderer(tokens, idx, options, env, self);
+      }
+    }
   }
-})
+}))
