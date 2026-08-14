@@ -1,10 +1,13 @@
-SSH服务
 ---
+title: SSH服务
+---
+
+# {{ $frontmatter.title }}
+
 
 安全外壳。
 
----
-
+## 背景
 韩会会正在上一节无聊的选修课，想学Linux，只看书不操作的效果肯定不好。教室里没有插座，带电脑的计划泡汤。我的 **Android手机（甲）** 上安装了 **Termux**，可以用来学习 Linux，但手机屏幕太小，长时间操作起来很不方便。于是我想从 **iPad（乙）** 上下手，再连接蓝牙键盘，操作起来的感觉和电脑相似，舒服多了。
 
 为此，在乙上安装好终端软件，以 **Terminal** 为例。打开一看，立马傻眼：“无法打开会话，请先添加服务器！”什么用户名、地址、端口、密码……完全不清楚怎么填！😭
@@ -13,7 +16,7 @@ SSH服务
 
 这是我第一次接触服务器相关的知识，于是记录这段经历，留作纪念🎉。我还尝试了iOS上其他的SSH终端软件，比如`SSH Term`、`xTerm256` 、`ShellFish`，都是我认为比较好用的。
 
-# 🧩 开启 SSH 服务
+## 🧩 开启 SSH 服务
 1. 设置密码（首次登录需要）：
     ```bash
     passwd
@@ -30,8 +33,8 @@ SSH服务
     sshd
     ```
 
-# 📡 正确选取 IP 地址
-## 查看所有接口
+## 📡 正确选取 IP 地址
+### 查看所有接口
 ```bash
 u0_a294@localhost:~$ ifconfig
 Warning: cannot open /proc/net/dev (Permission denied). Limited output.
@@ -55,7 +58,7 @@ u0_a294@localhost:~$
 ```
 其中`inet`的内容是我们想要的。不过这么多`inet`，到底是哪个呢？
 
-## ❓ 哪个才是正确 IP？
+### ❓ 哪个才是正确 IP？
 | 接口名  | 作用 | 用于 SSH |
 | :----: | :--: | :------: |
 | lo	|本地回环地址（localhost）	|❌|
@@ -70,8 +73,8 @@ u0_a294@localhost:~$
     2. 给连接设备分配 IP（如 iPad 得到 192.168.174.xx）
     3. 启用 NAT，把 iPad 的数据转发到蜂窝网络 	
 
-# 🧩 连接 SSH
-## GUI（本例）
+## 🧩 连接 SSH
+### GUI（本例）
 - 将乙连接甲的热点
 - IP 地址：通过 Android 接口查看
 - 端口：`8022`(默认值，没root的设备无法修改)
@@ -79,7 +82,7 @@ u0_a294@localhost:~$
 - 密码：在甲上用`passwd`设置的密码
 
 开心冲浪！😅
-## 命令行模式（Linux丙设备的终端，欲连接甲的SSH服务）
+### 命令行模式（Linux丙设备的终端，欲连接甲的SSH服务）
 ```bash
 ssh <用户名>@<主机IP地址> -p <端口号>
 # 例如 ssh u0_a294@192.168.xxx.xxx -p 8022
@@ -121,14 +124,14 @@ Original contents retained as /home/binzz/.ssh/known_hosts.old
 binzz@C7VF:~$
 ```
 
-# SSH 密钥对实现安全的免密登录
+## SSH 密钥对实现安全的免密登录
 密码容易被暴力破解，禁止密码登录、使用密钥对可以解决这个问题，且不需要手动输入密码。先生成密钥对，确认可以用密钥登录后，再禁止密码登录，以防被锁死。
 
 SSH 密钥对由一个公钥和一个私钥组成，两者一一对应。公钥需要公开，私钥必须保密。
 
 利用密钥对进行连接的一般方法如下。
 
-## 客户端生成密钥对
+### 客户端生成密钥对
 ```bash
 binzz@C7VF:~$ ssh-keygen -t ed25519 -C my_email@example.com
 Generating public/private ed25519 key pair.
@@ -138,7 +141,7 @@ Overwrite (y/n)? n
 binzz@C7VF:~$ 
 ```
 
-## 将客户端的公钥添加到服务端
+### 将客户端的公钥添加到服务端
 ```bash
 binzz@C7VF:~$ ssh-copy-id -i .ssh/id_ed25519.pub -p 8022 admin@<serverIP>
 /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: ".ssh/id_ed25519.pub"
@@ -153,11 +156,11 @@ and check to make sure that only the key(s) you wanted were added.
 
 binzz@C7VF:~$ 
 ```
-## 登录，不需要输入密码
+### 登录，不需要输入密码
 ```bash
 ssh admin@<serverIP>
 ```
-## 禁止密码和Root登录
+### 禁止密码和Root登录
 在服务端上
 ```bash
 vim /etc/ssh/sshd_config

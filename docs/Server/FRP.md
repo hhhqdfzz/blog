@@ -1,12 +1,15 @@
-FRP
 ---
+title: FRP
+---
+
+# {{ $frontmatter.title }}
 
 一种内网穿透的方法。
 
-# 背景
+## 背景
 我唯一的一台电脑放在家里。有时我着急出门，但此时电脑可能在运行耗时较长的任务，运行完了我还要操控电脑，于是把更便携的 iPad 带出门，希望通过 ShellFish 或 RVNC Viewer 这样的 App 连接电脑，达到远程控制的目的。电脑连接的WLAN在运营商下，公网IP会实时变化，且端口受到运营商限制，所以不能直接通过电脑的公网IP来连接。我了解到可以通过内网穿透来解决。
 
-# 内网穿透与FRP {#内网穿透与FRP}
+## 内网穿透与FRP {#内网穿透与FRP}
 **内网穿透**，是将本地端口映射到公网端口，实现从公网访问本地服务的目的。原理是：
 ```text
 远程设备  →  主动连接中转服务器  ←  内网设备
@@ -37,11 +40,11 @@ flowchart BT
 ```
 出门前，先在云服务器上启动 `frps` 服务，然后在电脑上启动 `frpc`。在外面，用 iPad 通过 RealVNC Viewer 或 ShellFish 连接云服务器的 `remotePort` 端口，即可访问家里的电脑。此时在FRP的范畴内，云服务器是服务端，电脑是客户端；在“某服务”的范畴内，电脑是服务端，iPad是客户端。
 
-# 配置步骤
+## 配置步骤
 https://zhuanlan.zhihu.com/p/1913504354721333378
 这篇文章是保姆级别，但在配置文件中以明文（token）的形式设置密码，存在安全问题，于是我另写了一套步骤。
 
-## 下载 FRP 项目
+### 下载 FRP 项目
 在服务端和客户端上均执行：
 ```bash
 wget https://github.com/fatedier/frp/releases/download/v0.68.0/frp_0.68.0_linux_amd64.tar.gz
@@ -52,9 +55,9 @@ $ ls
 frpc  frpc.ini  frps  frps.ini  LICENSE
 ```
 
-## 生成密钥对——TLS 证书认证
+### 生成密钥对——TLS 证书认证
 完全摒弃 token，使用证书认证，更安全且无需共享密码。
-### 创建生成密钥对的配置文件
+#### 创建生成密钥对的配置文件
 ```ini
 # ca.cnf
 [req]
@@ -110,7 +113,7 @@ CN = MyMint
 - 为自定义名称的字段
 	`my_distinguished_name`、`v3_req`、`alt_names`。
 	
-### 生成私钥和证书
+#### 生成私钥和证书
 ```bash
 #!/usr/bin/env bash
 # keycrtgen.sh 
@@ -173,7 +176,7 @@ fi
 # 删除 keycrtgen.sh 生成的文件
 rm ca.crt  ca.key  ca.srl  client.crt  client.csr  client.key  server.crt  server.csr  server.key
 ```
-### 整理私钥和证书文件
+#### 整理私钥和证书文件
 ```bash
 $ ls
 ca.cnf  ca.crt  ca.key  ca.srl  clean.sh  client.cnf  client.crt  client.csr  client.key  keycrtgen.sh  server.cnf  server.crt  server.csr  server.key
@@ -182,7 +185,7 @@ ca.cnf  ca.crt  ca.key  ca.srl  clean.sh  client.cnf  client.crt  client.csr  cl
 将`server.crt`、`server.key`、`ca.crt`上传到服务端，`client.crt`、`client.key`、`ca.crt`保存到客户端。
 `.cnf`和`.csr`文件是生成证书的辅助文件，删除后不影响 frp 的运行。
 
-## 服务端和客户端的 FRP配置文件
+### 服务端和客户端的 FRP配置文件
 ```ini
 # 服务端上的 frps.ini
 bindPort = 7000
@@ -219,8 +222,8 @@ remotePort = 5901
 ```
 这两份配置文件的各种 Port 与前面画的[FRP原理图](#内网穿透与FRP)一一对应；提到的路径是相对于配置文件本身的，也可以是绝对路径。
 
-# 测试步骤
-## SSH
+## 测试步骤
+### SSH
 ```bash
 # 服务端，要指定配置文件路径
 ./frps -c frps.ini
@@ -258,7 +261,7 @@ nc -zv <服务器公网IP> 7000
 	登录云服务器的网页控制台，设置安全组，放行 7000 端口和 6000 端口，类似于下图：
 	![设置云服务器的安全组](assets/image.png)
 
-## VNC
+### VNC
 服务端：
 ```
 frps -c frps.ini
@@ -286,7 +289,7 @@ ssh -L 15901:localhost:5901 -p 6000 服务器IP
 最后去远程设备上，用 VNC 连接 `localhost:15901` 即可。
 
 
-# 写成服务
+## 写成服务
 测试成功后，如果以后经常用到的话，建议写成服务。
 
 将`frps`和`frpc`移动到 `/usr/bin` 目录下，将`LICENSE`、`.ini`文件、证书和密钥移动到 `/etc/frp` 目录下，结构如下（以客户端为例，服务端同理）：
@@ -302,7 +305,7 @@ $ sudo tree /etc/frp/
 
 2 directories, 5 files
 ```
-## 系统级服务——frpsd, frpcd
+### 系统级服务——frpsd, frpcd
 有两个 `.service` 文件，在 `/etc/systemd/system` 目录下。
 ```ini
 # frpsd.service
@@ -338,7 +341,7 @@ RestartSec=5s
 WantedBy=multi-user.target
 ```
 
-## 用户级服务——x11vnc
+### 用户级服务——x11vnc
 在 `~/.config/systemd/user` 目录下。
 ```ini
 # x11vncserver.service
@@ -355,7 +358,7 @@ RestartSec=5s
 WantedBy=default.target
 ```
 
-## 后续工作
+### 后续工作
 写好服务文件后，在服务端和客户端均执行：
 ```bash
 systemctl daemon-reload
