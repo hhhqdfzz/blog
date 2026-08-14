@@ -57,10 +57,15 @@ sudo apt install network-manager
     Auto WLAN2_5G   6889ebd5-b2c6-45c7-b4dd-ac14cbec64bb  wifi      --     
     $ 
     ```
+
     **Q2**：其中“自动”二字意味着什么？是在手机设置经常看到的“自动连接”吗？
+
     **A2**：从NAME上看，是的。
+
     **Q3**：电脑开机默认连接的网络是 CAMPU，偶尔需要连接 WLAN1。如果按照 Q1 中的步骤，每次都要输入密码，很麻烦。有没有什么办法可以避免这种情况，实现无密码连接 WLAN1？
+
     **A3**：以后可以用 `nmcli connection up "WLAN1"` 免密连接，但注意，如果要免密连接`CAMPU`，则应该是 `nmcli connection up "自动 CAMPU"` 而非 `nmcli connection up "CAMPU"`。
+
 6. 附：打开无线网络
     ```baah
     sudo nmcli radio wifi on
@@ -105,29 +110,4 @@ get <remote_file_or_directory>
 exit
 ```
 
-在 `sftp>` 提示符下，输入 `!` 后接本地 Shell 命令（如 `!ls`、`!pwd`），可以在不退出会话的情况下执行本地操作，但**这不会改变 `sftp` 当前的本机路径记忆**，仅用于临时查看或操作。例如：
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+在 `sftp>` 提示符下，输入 `!` 后接本地 Shell 命令（如 `!ls`、`!pwd`），可以在不退出会话的情况下执行本地操作，但**这不会改变 `sftp` 当前的本机路径记忆**，仅用于临时查看或操作。

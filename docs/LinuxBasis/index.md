@@ -25,7 +25,7 @@ Debian系更受个人用户欢迎，而RedHat系更受企业用户欢迎。两�
 本笔记采用的各种版本/型号：
 | 类型 | 版本/型号 | 在后文的简称 |
 | :---: | :---: | :---: |
-| 电脑 | 微星 Alpha 17 C7NF  | 设备 |
+| 电脑 | 微星 Alpha 17 C7VF  | 设备 |
 | Linux发行版 | Ubuntu 24.04.2 LTS，或其平替版本 Linux Mint 22.3。还会提到 RedHat 系的 Rocky Linux 10.1，是 CentOS 的延伸。 | Ubuntu/Mint/Rocky |
 
 
