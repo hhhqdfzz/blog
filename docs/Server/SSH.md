@@ -182,3 +182,35 @@ systemctl restart sshd
 # pkill sshd
 # sshd
 ```
+
+## `~/.ssh/config` 文件
+通过它，可以为不同的远程主机预设登录别名、IP 地址、端口、用户名和私钥路径，从而把复杂的 `ssh <user>@<host> -p <port> -i <key>` 简化为一条简单的 `ssh <alias>` 命令。
+
+* 权限要求：为了安全，该文件的权限必须设为 600（仅所有者可读写），否则 SSH 会报错拒绝读取。
+
+文件内容示例：
+```bash
+# 简易服务器配置
+Host myserver
+    HostName 192.168.1.100
+    User root
+    Port 22
+
+# 使用指定密钥的服务器
+Host dev-env
+    HostName 10.0.0.50
+    User ubuntu
+    IdentityFile ~/.ssh/id_rsa_dev
+
+# 使用通配符（对所有主机生效的通用配置）
+Host *
+    ServerAliveInterval 60
+    AddKeysToAgent yes
+```
+
+* Host：自定义的别名，输入 ssh <Host> 即可触发对应配置。
+* HostName：真实的远程服务器 IP 地址或域名。
+* User：登录远程服务器的用户名。
+* Port：SSH 端口（默认是 22）。
+* IdentityFile：该主机专属的私钥文件路径。
+* ServerAliveInterval：每隔多少秒向服务器发送一次心跳包，防止连接超时断开。 
