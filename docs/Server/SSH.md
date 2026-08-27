@@ -189,6 +189,7 @@ systemctl restart sshd
 * 权限要求：为了安全，该文件的权限必须设为 600（仅所有者可读写），否则 SSH 会报错拒绝读取。
 
 文件内容示例：
+
 ```bash
 # 简易服务器配置
 Host myserver

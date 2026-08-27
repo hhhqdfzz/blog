@@ -67,7 +67,7 @@ sudo apt install network-manager
     **A3**：以后可以用 `nmcli connection up "WLAN1"` 免密连接，但注意，如果要免密连接`CAMPU`，则应该是 `nmcli connection up "自动 CAMPU"` 而非 `nmcli connection up "CAMPU"`。
 
 6. 附：打开无线网络
-    ```baah
+    ```bash
     sudo nmcli radio wifi on
     ```
 
