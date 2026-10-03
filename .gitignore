@@ -8,3 +8,15 @@ CLAUDE.md
 docs/api-examples.md
 docs/markdown-examples.md
 docs/Server/参考FRP配置/
+
+# Doubao local agent/memory files
+.doubao/
+**/.doubao/
+*memory*/
+**/*memory*/
+*memories*/
+**/*memories*/
+.session*/
+**/.session*/
+agents/
+**/agents/

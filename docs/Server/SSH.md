@@ -190,26 +190,18 @@ systemctl restart sshd
 
 文件内容示例：
 
-```bash
-# 简易服务器配置
-Host myserver
-    HostName 192.168.1.100
-    User root
-    Port 22
+| 配置段 | 配置键 | 值 |
+| --- | --- | --- |
+| 简易服务器配置：`Host myserver` | `HostName` | `192.168.1.100` |
+|  | `User` | `root` |
+|  | `Port` | `22` |
+| 指定密钥的服务器：`Host dev-env` | `HostName` | `10.0.0.50` |
+|  | `User` | `ubuntu` |
+|  | `IdentityFile` | `~/.ssh/id_rsa_dev` |
+| 通用配置：`Host *` | `ServerAliveInterval` | `60` |
+|  | `AddKeysToAgent` | `yes` |
 
-# 使用指定密钥的服务器
-Host dev-env
-    HostName 10.0.0.50
-    User ubuntu
-    IdentityFile ~/.ssh/id_rsa_dev
-
-# 使用通配符（对所有主机生效的通用配置）
-Host *
-    ServerAliveInterval 60
-    AddKeysToAgent yes
-```
-
-* Host：自定义的别名，输入 ssh <Host> 即可触发对应配置。
+* Host：自定义的别名，输入 `ssh <Host>` 即可触发对应配置。
 * HostName：真实的远程服务器 IP 地址或域名。
 * User：登录远程服务器的用户名。
 * Port：SSH 端口（默认是 22）。
