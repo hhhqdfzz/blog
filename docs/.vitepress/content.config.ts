@@ -10,6 +10,7 @@ export const CONTENT_DIRS: DirConfig[] = [
   { dir: 'SoftShare', navText: '实用软件分享' },
   { dir: 'LinuxBasis', navText: 'Linux 基础' },
   { dir: 'Server', navText: '服务器架设' },
+  { dir: 'WindowsNotes', navText: 'Windows 笔记' },
 ]
 
 // ── 以下为自动派生，不要手动改 ──

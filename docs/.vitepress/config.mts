@@ -120,7 +120,7 @@ export default withMermaid(defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/hhhqdfzz' },
+      { icon: 'github', link: 'https://github.com/hhhqdfzz/blog' },
       { icon: {svg:bilibiliIcon}, link: 'https://space.bilibili.com/550025007?spm_id_from=333.1007.0.0' }
     ],
 

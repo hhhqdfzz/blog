@@ -101,10 +101,64 @@ rm ~/wipefile
 VBoxManage modifymedium disk to_shrink_dynamic.vdi --compact
 ```
 
+## 扩展包（Extension Pack）与客户机增强包（Guest Additions）{#扩展包与客户机增强包}
+|项目|扩展包 Extension Pack|客户机增强包 Guest Additions|
+|---|---|---|
+|安装位置|**宿主机（本机）VirtualBox软件层面**|**每一台虚拟机内部系统**|
+|安装对象|整个VirtualBox程序|单独每一个虚拟机系统|
+|核心用途|USB高速、VRDP远程、NVMe|PVE体验：分辨率、剪贴板、共享文件夹、鼠标、时间同步|
+|文件|`Oracle_VM_VirtualBox_Extension_Pack.vbox‑extpack`|`VBoxGuestAdditions.iso`|
+|是否每台虚拟机重复装|❌一次全局安装全部生效|✅每台虚拟机单独装一次|
+|开源协议|非开源（商用需授权）|开源GPL|
+
+✅ 安装建议
+1. 先装扩展包，再装增强包
+2. 扩展包和增强包的版本最好保持一致，否则大概率各种bug（剪贴板失效、USB报错、分辨率异常等）。
+3. 安装增强包，有利于AI助理操作虚拟机。
+
+### 安装扩展包 
+在[官网下载页](https://www.virtualbox.org/wiki/Downloads)中，如下图所示，点击右下角的 Accept and download，下载扩展包：
+![安装Virtualbox插件](assets/virtualbox-2.png)
+得到一个名为 `Oracle_VirtualBox_Extension_Pack-7.2.6.vbox-extpack` 的文件，双击打开，弹出如下页面：
+![安装Virtualbox插件](assets/virtualbox-3.png)
+点“安装”。
+![安装Virtualbox插件](assets/virtualbox-4.png)
+划到底，点“我同意”，输入密码授予 root 权限，安装完成后重启。
+
+### 安装客户机增强包 {#安装客户机增强包}
+增强包的镜像文件是VirtualBox自带的，不用网上单独下载。
+
+启动虚拟机，在虚拟机窗口顶部菜单栏【设备(Devices)】→【Insert Guest Additions CD Image…（插入增强功能CD镜像）】，会自动把iso挂载到虚拟机光驱里。
+
+> ⚠ 在自动缩放模式下，虚拟机窗口顶部菜单栏是隐藏的，可以按相应按键（默认为 右Ctrl + Home）调出这个菜单。按键的查询方法为：Virtualbox菜单栏 -> 管理 -> 全局设定 -> 输入 -> 虚拟电脑，查询到“主机组合键”（**主机键**）和“弹出菜单”两项，即可得知调出虚拟机菜单的按键。
+
+按如上步骤挂载后，分为两种情况进行安装。
+
+#### 🖥️情况1：虚拟机系统是 Windows（Win10/11）
+
+1. 文件资源管理器打开虚拟光驱；自动弹出安装向导；
+2. 如果没自动弹窗，手动双击 `VBoxWindowsAdditions.exe`；一路下一步；
+3. 遇到驱动签名警告全部选择继续安装；
+4. **重启虚拟机**；重启完成后：自适应分辨率、双向剪贴板、鼠标无缝进出就生效。
+
+#### 🐧情况2：虚拟机系统是 Ubuntu（Linux）
+1. 安装内核头文件与编译工具
+	```bash
+	sudo apt install build-essential linux-headers-$(uname -r)
+	```
+2. 打开终端，进入挂载的光驱目录（一般是 `/media/$USER/VBox_GAs_xxx`）
+	```bash
+	cd /media/$USER/VBox_GAs_*
+	sudo ./VBoxLinuxAdditions.run
+	```
+3. 等待编译全部跑完；**重启虚拟机**
+
 ## 键盘独占模式
-使按下的快捷键被虚拟机而非宿主机捕获，例如按下 Super 键，打开的是虚拟机而非宿主机的菜单。要实现这样的功能，请打开 VirtualBox 菜单栏的 “管理 -> 全局设定”，弹出如下窗口，勾选“自动独占键盘”。
+使按下的快捷键被虚拟机而非宿主机捕获，例如按下 Super 键，打开的是虚拟机而非宿主机的菜单。要实现这样的功能，请打开 VirtualBox 菜单栏的 “管理 -> 全局设定”，弹出如下窗口，在“输入”中，勾选“自动独占键盘”。
 
 ![键盘独占设置](assets/virtualbox-7.png)
+
+如果细细研究上述窗口中的“虚拟电脑”一栏，会发现有很多按键组合是操控虚拟机窗口的特定按键。[“安装客户机增强包”一节](#安装客户机增强包)中，在自动缩放模式下调出虚拟机菜单栏的按键查询，就是一个例子。
 
 ### 💡 补充：其他常见的“冲突”按键
 即使启用了独占，有些按键组合因为被操作系统底层占用，也可能无法直接发送给虚拟机。针对这些情况，VirtualBox 也提供了解决方案：
@@ -115,7 +169,7 @@ VBoxManage modifymedium disk to_shrink_dynamic.vdi --compact
 | **`Alt + Tab`** | 在宿主机程序中切换。 | 修改全局偏好设置：**File > Preferences > Input**，勾选 **"Auto-capture keyboard"** |
 | **`Ctrl + Alt + F1`~`F12`** | 切换宿主机的虚拟控制台（Linux）。 | 使用快捷键 **Host 键 + F1**~**F12** |
 
-如果尝试了以上方法仍无效，可以检查一下虚拟机是否安装了 **VirtualBox Guest Additions（增强功能）**。安装它不仅能提升鼠标切换的流畅度（实现鼠标无缝移出），也是键盘正常工作的基础保障。
+如果尝试了以上方法仍无效，可以检查一下虚拟机是否安装了[客户机增强包](#扩展包与客户机增强包)。
 
 
 ## 虚拟机网络设置
@@ -142,11 +196,11 @@ NAT 即 Network Address Translation，网络地址转换，流程 如下：
 
 在虚拟机上：
 ```bash
-binzz@Virtualbox:~$ ip route
+$ ip route
 default via 10.0.2.2 dev enp0s3 proto dhcp metric 100 
 10.0.2.0/24 dev enp0s3 proto kernel scope link src 10.0.2.15 metric 100 
 169.254.0.0/16 dev enp0s3 scope link metric 1000 
-binzz@Virtualbox:~$ 
+$ 
 ```
 其中 `default via` 后面的IP地址`10.0.2.2`，就是虚拟机眼中宿主机的IP地址。
 
@@ -173,22 +227,14 @@ ip addr show
 
 ## USB 功能
 #### 普通USB
-需要去[官网的下载页](https://www.virtualbox.org/wiki/Downloads)安装插件。
-![安装Virtualbox插件](assets/virtualbox-2.png)
-得到一个名为 `Oracle_VirtualBox_Extension_Pack-7.2.6.vbox-extpack` 的文件，双击打开，弹出如下页面：
-![安装Virtualbox插件](assets/virtualbox-3.png)
-点“安装”。
-![安装Virtualbox插件](assets/virtualbox-4.png)
-划到底，点“我同意”，输入密码授予 root 权限，安装完成后重启。
-
-然后打开虚拟机的USB设置，发现没有找到USB设备，尽管该设备已经插入了。
+确保宿主机安装了[扩展包](#安装扩展包)，然后打开虚拟机的USB设置，发现没有找到USB设备，尽管该设备已经插入了。
 ![虚拟机USB设置](assets/virtualbox-5.png)
 
 这是因为你没有加入 `vboxusers` 组，或者曾经加入过，也重启了系统，但中间更新或重新安装过 VirtualBox 或插件，导致你不知不觉就被移出了这个组。将你加入这个组，然后重启系统即可。
 ```bash
 sudo usermod -aG vboxusers $USER
 ```
-#### 启动U盘
+#### 启动U盘 {#启动U盘}
 按照上一节的说明，如果USB端口插入的是一个U盘，该U盘只被当成了一个普通U盘。如果插入的是启动U盘只，就没有发挥“启动”的作用。
 
 解决方案为，**将U盘映射为vmdk虚拟磁盘**。启动U盘不能同时被USB直通（上一节介绍的方式）和 vmdk 两种方式占用。如果你的启动U盘被上一节介绍的方法占用，请先取消相应的设置。
@@ -203,7 +249,58 @@ VBoxManage internalcommands createrawvmdk \
   -rawdisk /dev/sda
 chown binzz:binzz ~binzz/sandisk-usb.vmdk
 ```
-若宿主机是Windows，由于 Windows 对磁盘的管理方式不同，并不能直接创建 vmdk 文件，详情见我的 Windows 笔记。
+若宿主机是Windows，由于 Windows 对磁盘的管理方式不同，并不能直接创建 vmdk 文件，具体步骤如下：
+
+1. **授权工作**
+	克隆[dskacl仓库](https://github.com/RolKau/dskacl)，解压到 `D:\Downloads\dskacl-master`。
+  	需要使用 `showdsks.vbs` 和 `dskacl.exe` 两个文件，但克隆的仓库里没有 `.exe` 文件，需要编译，用 MSVC（Microsoft Visual Studio） 而不能用 GCC（唉，Windows真不通用）。
+  	用管理员身份打开 Developer Command Prompt for VS 2022（一种安装了 Microsoft Visual Studio 后就有的命令行，我这边是2022的版本），进入 `D:\Downloads\dskacl-master` 目录，然后执行下面的命令以编译 `dskacl.c` 文件：
+  	```powershell
+  	cl dskacl.c /Fe:dskacl.exe advapi32.lib
+  	```
+	- cl 是MSVC的编译器
+	- `advapi32.lib` 是Windows权限相关的系统库，dskacl操作ACL权限必须链接它。
+
+	下面的操作看不懂没关系，只需要知道，是在修改Windows对物理磁盘设备的访问权限。
+
+	```powershell
+	PS D:\UserData\Downloads\dskacl-master> cscript /nologo showdsks.vbs -d
+	Disk;"PnPDeviceID";BytesPerSector;TotalSectors;
+	1;"<某个PnPDeviceID>";512;240316335;    # 这个ID含设备名的信息，我看出是我的启动U盘
+	0;"<另一个PnPDeviceID>";512;2000397735;	
+	PS D:\UserData\Downloads\dskacl-master> .\dskacl.exe -i "<启动U盘的PnPDeviceID>" -s "D:(A;;FX;;;WD)(A;;FA;;;SY)(A;;FA;;;BA)(A;;FX;;;RC)(A;;GWGR;;;AU)" -r -v
+	Looking for disk devices...
+	Found: USBSTOR\DISK&VEN__USB&PROD__SANDISK_3.2GEN1&REV_1.00\0101AF07EEDB54EF862F121F5F174A26B9C4ED8482EBB1B766BD3FF8FFF124F    # 这就是启动U盘的PnPDeviceID
+	Access control list successfully changed!
+	Reconnecting device to reload security parameters...
+	Done!
+	PS D:\UserData\Downloads\dskacl-master> 
+	```	
+	在 Linux 中，要获得对磁盘的访问权限，以 root 的名义就可以了，但在 Windows 中，并不是用管理员权限运行就可以了的。	
+	Windows 虽然有类似 Linux 的挂载与卸载，称为联机（Online）与脱机（Offline），但不支持可移动磁盘的脱机（相当于 Linux 中的卸载），只能弹出，限制了对可移动磁盘的底层访问。这就是 Windows 相较于 Linux，需要做如上准备工作的原因，打破限制。	
+	与其说Windows的磁盘管理"不完善"，不如说两者的设计哲学不同。Linux是“一切皆文件”，适合需要底层操作的高级用法，较为自由；Windows认为用户不太了解底层操作，对普通用户做了更多"保护"，只是我个人认为是好心办坏事罢了，例如著名的 BitLocker。	
+
+2. **查看启动U盘在Windows中的 DeviceID**
+	```pwsh
+	PS C:\Users\binzz> wmic diskdrive list brief
+	Caption                          DeviceID            Model                            Partitions  Size
+	USB  SanDisk 3.2Gen1 USB Device  \\.\PHYSICALDRIVE1  USB  SanDisk 3.2Gen1 USB Device  2           123041963520
+	SAMSUNG MZVL21T0HCLR-00B00       \\.\PHYSICALDRIVE0  SAMSUNG MZVL21T0HCLR-00B00       6           1024203640320
+	PS C:\Users\binzz>
+	```
+	找到了，是`\\.\PHYSICALDRIVE1`。
+
+3. **制作 vmdk 文件**
+	```powershell
+	PS D:\UserData\Downloads\dskacl-master> VBoxManage createmedium disk `
+	>>   --filename "E:\sandisk-usb.vmdk" `
+	>>   --format VMDK `
+	>>   --variant RawDisk `
+	>>   --property RawDrive=\\.\PHYSICALDRIVE1 # 换成你自己这边的DeviceID
+	0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+	Medium created. UUID: d5f2c74f-ad17-4cf9-afd5-cd775dabbd69
+	PS D:\UserData\Downloads\dskacl-master>
+	```
 
 ##### 将vmdk文件挂载到虚拟机
 1. 查看存储信息
@@ -248,11 +345,20 @@ chown binzz:binzz ~binzz/sandisk-usb.vmdk
 ##### 进入Boot Manager选择启动设备
 开机后立刻狂按 F2 或 F12 进入 Boot Manager，选择U盘对应的条目，即可启动。进入系统后，发现自动挂载了启动U盘。一举两得！
 
+##### 删除 vmdk 文件的正确方法
+执行 `VBoxManage createmedium disk` 时，提示 "Error: The medium already exists."，说明 VirtualBox的媒体注册表里还有旧的vmdk记录，UUID冲突了。需要先注销旧记录再重建。不能直接删除 .vmdk 文件，会导致注册表记录不一致。正确的删除方法是：
 
+```bash
+VBoxManage closemedium disk E:\sandisk-usb.vmdk --delete 
+```
 
+`--delete` 会同时删除文件和注册表记录。
 
+如果报错说文件不存在但注册表有记录，用UUID注销：
 
-
+```bash
+VBoxManage closemedium disk {15cc8ced-557c-4cd4-b70c-d59ba911ffc7} --delete
+```
 
 ## 常见问题
 ### Virtualbox 虚拟机启动错误 {#Virtualbox虚拟机启动错误}
@@ -409,7 +515,7 @@ VBoxManage: error: Context: "RTEXITCODE handleExportAppliance(HandlerArg*)" at l
 binzz@C7VF:~$ 
 ```
 此时堪称大型翻车现场，宿主机的空间全部被占满了：
-![alt text](assets/virtualbox-6.png)
+![宿主机的空间全部被占满](assets/virtualbox-6.png)
 
 ```bash
 binzz@C7VF:~$ ls    # 怎么没有 KUbuntu26.ova 文件？
@@ -427,3 +533,14 @@ binzz@C7VF:~$
 ```bash
 VBoxManage clonehd source.vdi destination.vdi
 ```
+
+### virtualbox打开时默认停在扩展页而非机器页
+![virtualbox扩展页](assets/virtualbox-8.png)
+![virtualbox机器页](assets/virtualbox-9.png)
+
+**VirtualBox 的管理器会记住你上次关闭时停留的工具标签页（Extensions/Media等），下次启动直接恢复该页面，没有设置项可以永久固定默认主页**。
+
+1. 打开VirtualBox，切回左侧 虚拟机列表主页（Home，机器页）
+2. 不要直接点窗口右上角×关闭！！
+3. 顶部菜单：`File → Exit`（文件→退出）完整退出程序。> 
+> 只有用File→Exit退出，才会把当前「虚拟机主页」状态保存；直接点右上角叉关闭，有时会错误保存上次的扩展标签页状态。

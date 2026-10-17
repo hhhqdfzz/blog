@@ -49,7 +49,5 @@ description: 用 GPU
 
 
 [下载页](https://developer.nvidia.com/cuda-toolkit-archive)
+
 [安装参考](https://blog.csdn.net/Sihang_Xie/article/details/127347139)
-
-
-

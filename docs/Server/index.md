@@ -71,7 +71,7 @@ sudo apt install network-manager
     sudo nmcli radio wifi on
     ```
 
-## 文件传输
+## 文件传输 {#文件传输}
 ### scp
 ```bash
 scp <source> <destination> [-P port]

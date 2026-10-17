@@ -48,7 +48,7 @@ xdg-user-dirs-gtk-update
 ```
 会弹出一个窗口，询问是否更新 XDG 用户目录。不要勾选“Don't ask me this again”，否则后续再想将更改 XDG 用户目录的语言时，该方法会失效。
 
-![alt text](assets/xdguserdirs-1.png)
+![XDG 用户目录更新询问窗口](assets/xdguserdirs-1.png)
 
 但如果不勾选的话，每次登入系统都会弹出这个窗口，问你要不要把目录改回中文，为了防止这一点，请将 `/etc/xdg/user-dirs.conf` 中的 `enabled` 的值设为 `False`。
 

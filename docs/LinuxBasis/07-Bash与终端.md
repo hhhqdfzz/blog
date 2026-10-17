@@ -73,7 +73,7 @@ fi
 sudo apt install tmux
 ```
 大致是像这样，拆分窗口：
-![alt text](assets/bash-1.png)
+![tmux 拆分窗口](assets/bash-1.png)
 
 又远非拆分窗口（不然和 terminator 有什么区别呢），还可以保存会话记录呢！仅凭 tmux 自身的功能，保存会话的前提是不重启系统。不过安装[适当的插件](https://github.com/tmux-plugins/tmux-resurrect)，即使是重启系统，也可以恢复会话，这就是 tmux 的强大之处！
 
