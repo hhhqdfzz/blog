@@ -1,8 +1,8 @@
 ---
 title: macOS 笔记
 next:
-    text: 01 安装 Ubuntu 24.04.2 LTS（实机双系统）
-    link: /macOS/01-安装Ubuntu
+    text: 软件管理
+    link: /macOS/软件管理
 ---
 
 # {{ $frontmatter.title }}
