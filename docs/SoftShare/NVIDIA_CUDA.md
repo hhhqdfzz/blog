@@ -3,8 +3,8 @@ title: NVIDIA CUDA Toolkit
 alias: [nvidia-cuda, cuda]
 os: [Windows, Linux]
 category: [Development]
-tags: [Graphics Driver, CUDA, Parallel Computing, GPU] 
-description: 用 GPU 
+tags: [Graphics, CUDA, Parallel Computing, GPU] 
+description: NVIDIA推出的一种并行计算平台和编程模型。
 ---
 
 # {{ $frontmatter.title }}
@@ -17,37 +17,43 @@ description: 用 GPU
 
 ---
 
-1. 卸载残留的NVIDIA驱动（防止冲突）。如果你之前从来没有安装过NVIDIA驱动，请跳过这一步，以免误删。
-	```bash
-	sudo apt-get purge '^nvidia-.*'
-	sudo apt-get autoremove
-	```
-2. 安装推荐的NVIDIA驱动
-网上很多说法是安装 `ubuntu-drivers devices` 输出中推荐的驱动版本，比如推荐590，就是`sudo apt install nvidia-driver-590`，或者直接`sudo ubuntu-drivers autoinstall`，即可自动安装推荐的驱动版本，不需要看推荐。两者等效。
-	这两种方法都我试过，安装了之后重启，不仅没有解决驱动问题，连无线网络都不能用了。所以**不要听它的推荐！！！**
-	具体要安装哪个驱动版本，要根据你的显卡型号来定，到[官网](https://www.nvidia.com/en-us/drivers/)去查吧！
-	获取显卡型号：
-
-	```bash
-	binzz@C7VF:~$ lspci | grep -i nvidia
-	01:00.0 VGA compatible controller: NVIDIA Corporation AD107M [GeForce RTX 4060 Max-Q / Mobile] (rev a1)
-	01:00.1 Audio device: NVIDIA Corporation Device 22be (rev a1)
-	binzz@C7VF:~$ 
-	```
-	可知，我的显卡型号是`eForce RTX 4060`，在官网上查到支持的驱动版本是580，所以我应该安装580版本的驱动，即 `sudo apt install nvidia-driver-580`。
-3. 重启系统
-	```bash
-	sudo reboot
-	```
-4. 重启后验证驱动是否激活
-	```bash
-	nvidia-smi
-	```
-	如果看到显卡信息就说明装成功了。
-
-5. 再运行Gazebo，渲染窗口应该能打开。
-
-
-[下载页](https://developer.nvidia.com/cuda-toolkit-archive)
 
 [安装参考](https://blog.csdn.net/Sihang_Xie/article/details/127347139)
+
+如果你的显卡是NVIDIA的，那么安装 NVIDIA CUDA Toolkit，则可以在编程、运行算法中发挥 GPU 的性能，提高运行速度。
+
+首先你要[安装合适版本的 NVIDIA Dirver](NVIDIA_Driver.md)，`nvidia-smi` 的输出的 `CUDA Version` 值是可以安装的 CUDA 的最高版本。输出示例如下：
+
+```
+binzz@C7VF:~$ nvidia-smi
+Mon Nov  2 15:58:21 2026 
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.99.02              Driver Version: 595.99.02      CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0 Off |                  N/A |
+| N/A   43C    P0             15W /  140W |       2MiB /   8188MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+binzz@C7VF:~$
+```
+
+最高安装 13.2 版本，去[官方下载页](https://developer.nvidia.com/cuda-toolkit-archive)查询到，有好几个13.2.x，可以安装的最高版本其实是 13.2.xm（xm是下载页显示的x的最大值）。
+
+点进可以安装的最高版本13.2.2，发现可以选择的 Ubuntu 系统只有 22.04 和 24.04这两个版本（如下图所示），而我的系统是 Ubuntu 26.04，也就是说，我的系统不在可以选择的系统版本之内，怎么办呢？
+
+![我的系统不在可以选择的系统版本之内](assets/cuda-1.png)
+
+选择最接近的版本（我这里是24.04），出现了 Installer Type 选项，其中只有 `runfile(local)` 是与 Ubuntu 版本无关的，所以选择`runfile(local)`就可以了，然后按照选择后提供的安装方法安装 CUDA 就可以了！
+

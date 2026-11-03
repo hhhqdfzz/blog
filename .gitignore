@@ -21,3 +21,6 @@ docs/WindowsNotes/01-磁盘管理与关机优化完全指南.md
 **/.session*/
 agents/
 **/agents/
+
+# Only for macOS
+**/.DS_Store
