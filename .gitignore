@@ -1,26 +1,18 @@
 node_modules/
 .env
 dist/
+
 docs/.vitepress/cache/
 docs/.vitepress/config_*.mts
-.claude/
-CLAUDE.md
 docs/api-examples.md
 docs/markdown-examples.md
 docs/Server/参考FRP配置/
 docs/WindowsNotes/01-磁盘管理与关机优化完全指南.md
 
-# Doubao local agent/memory files
-.doubao/
-**/.doubao/
-*memory*/
-**/*memory*/
-*memories*/
-**/*memories*/
-.session*/
-**/.session*/
-agents/
-**/agents/
+# For AI
+.claude/
+CLAUDE.md
+.workbuddy/
 
-# Only for macOS
+# For macOS
 **/.DS_Store

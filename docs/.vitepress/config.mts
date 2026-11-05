@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import fs from 'fs'
 import path from 'path'
-import { CONTENT_DIRS, extractScalar, type DirConfig } from './content.config'
+import { CONTENT_DIRS, buildNav, extractScalar, resolveDirTitle, type DirEntry } from './content.config'
 
 // 如果2、3行有红色波浪线，尝试运行 `npm i --save-dev @types/node`
 
@@ -34,22 +34,16 @@ const bilibiliIcon = fs.readFileSync( path.resolve(process.cwd(), 'docs/bilibili
 // ── 自动生成 sidebar ──
 // 扫描 docs/<dir>/ 下所有 .md 文件，从 frontmatter 中读取 title 自动生成侧边栏条目
 // index.md 固定显示为"首页"，其 frontmatter title 用作侧边栏分类标题
-function autoSidebar(cfg: DirConfig): { text: string; items: Array<{ text: string; link: string }> } {
+function autoSidebar(cfg: DirEntry): { text: string; items: Array<{ text: string; link: string }> } {
   const docsDir = path.resolve(process.cwd(), 'docs')
   const fullDir = path.join(docsDir, cfg.dir)
 
-  if (!fs.existsSync(fullDir)) return { text: cfg.navText, items: [] }
+  if (!fs.existsSync(fullDir)) return { text: resolveDirTitle(cfg.dir), items: [] }
 
   const mdFiles = fs.readdirSync(fullDir).filter(f => f.endsWith('.md'))
 
-  // 从 index.md 的 frontmatter 中获取分类标题，fallback 为 navText
-  let sectionText = cfg.navText
-  const indexFile = mdFiles.find(f => f === 'index.md')
-  if (indexFile) {
-    const indexContent = fs.readFileSync(path.join(fullDir, indexFile), 'utf-8')
-    const title = extractScalar(indexContent, 'title')
-    if (title) sectionText = title
-  }
+  // 分类标题与导航栏显示名保持同一套规则（navText → index.md 的 title → 目录名）
+  const sectionText = resolveDirTitle(cfg.dir)
 
   // 为每个 .md 文件生成侧边栏条目
   const items = mdFiles.map(file => {
@@ -70,12 +64,48 @@ function autoSidebar(cfg: DirConfig): { text: string; items: Array<{ text: strin
   return { text: sectionText, items }
 }
 
+// ── 递归版导航组件 ──
+// 默认主题用相对路径导入 VPMenu / VPNavScreenMenuGroupSection，
+// 裸路径 alias 匹配不到，只能用 resolveId 按「解析后的绝对路径」精确拦截。
+// 被拦截的组件改用 theme/components/ 下的自定义实现：
+//   · VPMenu                        —— 分组改为可悬停展开的级联面板
+//   · VPNavScreenMenuGroupSection   —— 移动端递归分组
+// 使导航层级不再受默认主题的三层限制。
+const RECURSIVE_NAV_COMPONENTS = ['VPMenu.vue', 'VPNavScreenMenuGroupSection.vue']
+
+function recursiveNavPlugin() {
+  const themeComponentsDir = path.resolve(process.cwd(), 'docs/.vitepress/theme/components')
+
+  return {
+    name: 'blog:recursive-nav-components',
+    enforce: 'pre' as const,
+    resolveId(source: string, importer: string | undefined) {
+      if (!importer) return null
+
+      // 只处理来自 VitePress 默认主题目录的相对导入
+      if (!importer.includes('vitepress/dist/client/theme-default/components')) return null
+
+      const fileName = path.basename(source)
+      if (!RECURSIVE_NAV_COMPONENTS.includes(fileName)) return null
+
+      return path.join(themeComponentsDir, fileName)
+    },
+  }
+}
+
 export default withMermaid(defineConfig({
   title: "韩会会-QDFZZ. 的博客",
   description: "想写啥就写啥。",
   cleanUrls: true, // 去掉网页地址栏的 .html 后缀
   lastUpdated: true, // 显示最后更新时间
-  base: `/${BASE_NAME}/`, 
+  base: `/${BASE_NAME}/`,
+
+  // ⬇️ 用自定义组件替换默认主题的菜单组件
+  // 默认主题的 VPMenu 把分组渲染成一行静态标题，无法再往下分；
+  // 这里替换成级联面板实现，让 content.config.ts 里的 NAV 可以写任意层数。
+  vite: {
+    plugins: [recursiveNavPlugin()],
+  },
 
   themeConfig: {
     logo: '/logo.ico',
@@ -124,10 +154,8 @@ export default withMermaid(defineConfig({
       { icon: {svg:bilibiliIcon}, link: 'https://space.bilibili.com/550025007?spm_id_from=333.1007.0.0' }
     ],
 
-    nav: [
-      { text: 'Home', link: '/' },
-      ...CONTENT_DIRS.map(d => ({ text: d.navText, link: `/${d.dir}` })),
-    ],
+    // 导航栏结构完全由 content.config.ts 决定（下拉分组 / 显示文字 / 顺序）
+    nav: buildNav(),
 
     // ⬇️ 文档左侧栏 - 从 CONTENT_DIRS 自动生成
     // 新增/删除笔记或修改标题后无需手动更新 sidebar

@@ -1,0 +1,22 @@
+/* 菜单容器样式：VPMenu（一级面板）与级联子面板共用同一份定义。
+   相对默认主题去掉了 max-height / overflow-y: auto ——
+   二级面板是绝对定位在当前面板右侧的子元素，若父面板是滚动容器会被裁掉。 */
+
+.VPMenu {
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 128px;
+  border: 1px solid var(--vp-c-divider);
+  background-color: var(--vp-c-bg-elv);
+  box-shadow: var(--vp-shadow-3);
+  transition: background-color 0.5s;
+}
+
+/* 级联分组与后面的普通链接之间保留分隔线
+   （默认主题靠 VPMenuGroup + VPMenuLink 的相邻选择器实现，
+     这里分组换成了 VPMenuFlyout，故相应调整选择器） */
+.VPMenuFlyout + .VPMenuLink {
+  margin: 12px -12px 0;
+  border-top: 1px solid var(--vp-c-divider);
+  padding: 12px 12px 0;
+}

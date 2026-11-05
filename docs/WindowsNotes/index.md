@@ -15,6 +15,7 @@ Windows 是目前世界上最流行的操作系统，每个碰过电脑的人，
 学会了之后，就知道怎么在实体机上安装了。安装其他版本的 Windows 也是类似的方法。
 
 WinXP 的其中一个[产品密钥](https://cloud.tencent.com/developer/article/2442418)：M6TF9-8XQ2M-YQK9F-7TBB2-XGG88
+
 Win11 Pro 的其中一个产品密钥：VK7JG-NPHTM-C97JM-9MPGT-3V66T
 
 ### 1. 改造安装程序
